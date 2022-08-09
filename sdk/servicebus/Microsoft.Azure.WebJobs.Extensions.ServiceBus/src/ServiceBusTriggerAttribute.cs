@@ -29,10 +29,15 @@ namespace Microsoft.Azure.WebJobs
     [Binding]
     public sealed class ServiceBusTriggerAttribute : Attribute, IConnectionProvider
     {
-        private readonly string _queueName;
-        private readonly string _topicName;
-        private readonly string _subscriptionName;
+        private string _queueName;
+        private string _topicName;
+        private string _subscriptionName;
         private bool? _autoCompleteMessages;
+
+        // This is added for Hydrate ScaleController usecase
+        public ServiceBusTriggerAttribute()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceBusTriggerAttribute"/> class.
@@ -66,6 +71,7 @@ namespace Microsoft.Azure.WebJobs
         public string QueueName
         {
             get { return _queueName; }
+            set { _queueName = value; }
         }
 
         /// <summary>
@@ -75,6 +81,7 @@ namespace Microsoft.Azure.WebJobs
         public string TopicName
         {
             get { return _topicName; }
+            set { _topicName = value; }
         }
 
         /// <summary>
@@ -84,6 +91,7 @@ namespace Microsoft.Azure.WebJobs
         public string SubscriptionName
         {
             get { return _subscriptionName; }
+            set { _subscriptionName = value; }
         }
 
         /// <summary>

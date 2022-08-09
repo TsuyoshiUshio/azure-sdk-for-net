@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using Azure.Core;
 using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.WebJobs.ServiceBus.Bindings;
 using Microsoft.Azure.WebJobs.ServiceBus.Listeners;
 using Microsoft.Extensions.Options;
 
@@ -32,6 +33,11 @@ namespace Microsoft.Azure.WebJobs.ServiceBus
         public MessagingProvider(IOptions<ServiceBusOptions> options)
         {
             Options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public MessagingProvider(ServiceBusOptions options)
+        {
+            Options = options;
         }
 
         /// <summary>
