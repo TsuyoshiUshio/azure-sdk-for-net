@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+extern alias StorageQueues;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +18,7 @@ using Azure.Storage.Queues.Models;
 using Azure.Storage.Tests.Shared;
 using Microsoft.Azure.WebJobs.Extensions.Storage.Common.Tests;
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Azure.WebJobs.Host.Queues;
+using StorageQueues::Microsoft.Azure.WebJobs.Host.Queues;
 using Microsoft.Azure.WebJobs.Host.Scale;
 using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,7 +83,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
         /// Used to syncronize the application start and blob creation
         /// </summary>
         public static void NotifyStart(
-            [QueueTrigger(HostStartQueueName)] string input)
+            [StorageQueues::Microsoft.Azure.WebJobs.QueueTrigger(HostStartQueueName)] string input)
         {
             _startWaitHandle.Set();
         }
@@ -96,7 +98,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
         public static void BlobToQueue(
             [BlobTrigger(ContainerName + @"/{name}")] string input,
             string name,
-            [Queue(TestQueueNameEtag)] out CustomObject output)
+            [StorageQueues::Microsoft.Azure.WebJobs.Queue(TestQueueNameEtag)] out CustomObject output)
         {
             // TODO: Use CustomObject as param when POCO blob supported:
             //       https://github.com/Azure/azure-webjobs-sdk/issues/995
@@ -118,8 +120,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
         /// - table writing
         /// </summary>
         public static void QueueToICollectorAndQueue(
-            [QueueTrigger(TestQueueNameEtag)] CustomObject e2equeue,
-            [Queue(TestQueueName)] out CustomObject output)
+            [StorageQueues::Microsoft.Azure.WebJobs.QueueTrigger(TestQueueNameEtag)] CustomObject e2equeue,
+            [StorageQueues::Microsoft.Azure.WebJobs.Queue(TestQueueName)] out CustomObject output)
         {
             output = e2equeue;
         }
@@ -131,8 +133,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
         /// - table writing
         /// </summary>
         public static void QueueToTable(
-            [QueueTrigger(TestQueueName)] CustomObject e2equeue,
-            [Queue(DoneQueueName)] out string e2edone)
+            [StorageQueues::Microsoft.Azure.WebJobs.QueueTrigger(TestQueueName)] CustomObject e2equeue,
+            [StorageQueues::Microsoft.Azure.WebJobs.Queue(DoneQueueName)] out string e2edone)
         {
             // Write a queue message to signal the scenario completion
             e2edone = "done";
@@ -142,13 +144,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
         /// Notifies the completion of the scenario
         /// </summary>
         public static void NotifyCompletion(
-            [QueueTrigger(DoneQueueName)] string e2edone)
+            [StorageQueues::Microsoft.Azure.WebJobs.QueueTrigger(DoneQueueName)] string e2edone)
         {
             _functionChainWaitHandle.Set();
         }
 
         public static void BadMessage_String(
-            [QueueTrigger(BadMessageQueue)] string message,
+            [StorageQueues::Microsoft.Azure.WebJobs.QueueTrigger(BadMessageQueue)] string message,
 #pragma warning disable CS0618 // Type or member is obsolete
             TraceWriter log)
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -194,7 +196,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
             IHost host = new HostBuilder()
                 .ConfigureDefaultTestHost<DynamicConcurrencyTestJob>(b =>
                 {
-                    b.AddAzureStorageQueues();
+                    StorageQueues::Microsoft.Extensions.Hosting.StorageQueuesWebJobsBuilderExtensions.AddAzureStorageQueues(b);
 
                     b.Services.AddOptions<ConcurrencyOptions>().Configure(options =>
                     {
@@ -315,8 +317,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
             IHost host = new HostBuilder()
                 .ConfigureDefaultTestHost<AzureStorageEndToEndTests>(b =>
                 {
-                    b.AddAzureStorageBlobs().AddAzureStorageQueues();
-
+                    b.AddAzureStorageBlobs();
+                    StorageQueues::Microsoft.Extensions.Hosting.StorageQueuesWebJobsBuilderExtensions.AddAzureStorageQueues(b);
                     additionalSetup?.Invoke(b);
                 })
                 .ConfigureServices(services =>
@@ -367,7 +369,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
             IHost host = new HostBuilder()
                 .ConfigureDefaultTestHost<AzureStorageEndToEndTests>(b =>
                 {
-                    b.AddAzureStorageBlobs().AddAzureStorageQueues();
+                    b.AddAzureStorageBlobs();
+                    StorageQueues::Microsoft.Extensions.Hosting.StorageQueuesWebJobsBuilderExtensions.AddAzureStorageQueues(b);
                 })
                 .ConfigureServices(services =>
                 {
@@ -548,7 +551,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
                 IHost host = new HostBuilder()
                     .ConfigureDefaultTestHost<TestFixture>(b =>
                     {
-                        b.AddAzureStorageBlobs().AddAzureStorageQueues();
+                        b.AddAzureStorageBlobs();
+                        StorageQueues::Microsoft.Extensions.Hosting.StorageQueuesWebJobsBuilderExtensions.AddAzureStorageQueues(b);
                     })
                     .Build();
 
@@ -594,7 +598,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Storage.ScenarioTests
         {
             public static int InvocationCount;
 
-            public static async Task ProcessMessage([QueueTrigger(DynamicConcurrencyQueueName)] string input)
+            public static async Task ProcessMessage([StorageQueues::Microsoft.Azure.WebJobs.QueueTrigger(DynamicConcurrencyQueueName)] string input)
             {
                 await Task.Delay(250);
 
